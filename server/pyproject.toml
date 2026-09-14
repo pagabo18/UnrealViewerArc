@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "unreal-agent-mcp"
+version = "0.1.0"
+description = "Zero-dependency MCP server that lets Claude inspect and edit Unreal Engine Blueprints through the ClaudeBlueprintAgent editor plugin."
+requires-python = ">=3.9"
+license = { text = "MIT" }
+dependencies = []
+
+[project.scripts]
+unreal-agent-mcp = "unreal_agent_mcp.__main__:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["unreal_agent_mcp*"]
