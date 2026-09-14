@@ -1159,6 +1159,9 @@ class FakePlugin:
             out["bytes"] = 12345
         return out
 
+    def cmd_editor_screenshot(self, params):
+        return {"image": params.get("path") or "/fake/Saved/ClaudeAgent/Screenshots/Viewport.png", "async": True, "note": "Written after the next editor frame."}
+
     def cmd_widget_preview_diff(self, params):
         return {"width": 1920, "height": 1080, "changed_pixels": 4600, "diff_percent": 2.3, "bbox": {"x": 760, "y": 500, "w": 400, "h": 80}}
 

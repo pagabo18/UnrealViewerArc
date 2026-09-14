@@ -8,6 +8,8 @@ public class ClaudeBlueprintAgent : ModuleRules
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 		IWYUSupport = IWYUSupport.Full;
 
+		PrivateIncludePaths.Add(System.IO.Path.Combine(ModuleDirectory, "Private"));
+
 		PublicDependencyModuleNames.AddRange(new string[]
 		{
 			"Core",

@@ -302,7 +302,6 @@ namespace
 	FAgentResult CompileOne(UBlueprint* Blueprint, FAgentContext& Context, TSharedRef<FJsonObject>& OutJson)
 	{
 		FCompilerResultsLog Results;
-		Results.bLogDetailedResults = false;
 		FKismetEditorUtilities::CompileBlueprint(Blueprint, EBlueprintCompileOptions::None, &Results);
 		OutJson = CompileResultToJson(Blueprint, Results);
 		return FAgentResult::Ok(OutJson);
@@ -876,7 +875,7 @@ namespace
 			for (const FString& PinName : RemovePins)
 			{
 				bool bRemoved = false;
-				if (UEdGraphPin* Pin = Entry->FindPin(FName(*PinName)))
+				if (Entry->FindPin(FName(*PinName)) != nullptr)
 				{
 					bRemoved = Entry->RemoveUserDefinedPinByName(FName(*PinName));
 				}

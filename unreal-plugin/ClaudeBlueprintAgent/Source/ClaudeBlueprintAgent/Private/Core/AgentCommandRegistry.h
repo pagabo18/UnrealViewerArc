@@ -23,3 +23,4 @@ void RegisterBlueprintCommands(FAgentCommandRegistry& Registry);
 void RegisterGraphCommands(FAgentCommandRegistry& Registry);
 void RegisterWidgetCommands(FAgentCommandRegistry& Registry);
 void RegisterBatchCommand(FAgentCommandRegistry& Registry);
+void RegisterEditorCommands(FAgentCommandRegistry& Registry);

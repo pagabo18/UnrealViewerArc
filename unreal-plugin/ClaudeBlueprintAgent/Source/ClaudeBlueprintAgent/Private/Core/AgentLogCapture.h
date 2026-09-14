@@ -23,6 +23,7 @@ public:
 	void Register();
 	void Unregister();
 
+	using FOutputDevice::Serialize;
 	virtual void Serialize(const TCHAR* V, ELogVerbosity::Type Verbosity, const FName& Category) override;
 	virtual bool CanBeUsedOnAnyThread() const override { return true; }
 	virtual bool CanBeUsedOnMultipleThreads() const override { return true; }

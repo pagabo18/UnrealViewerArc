@@ -44,3 +44,15 @@ def screenshot_diff(ctx, a, b, threshold=None):
     else:
         line += "\nno differences"
     return line
+
+
+@tool("editor_screenshot", "Experimental: request a screenshot of the editor viewport (written asynchronously after the next frame).",
+      schema({"path": P("string", "Output PNG path (default Saved/ClaudeAgent/Screenshots)."), "ui": P("boolean", "Include editor UI (default true).")}))
+def editor_screenshot(ctx, path=None, ui=None):
+    params = {}
+    if path:
+        params["path"] = path
+    if ui is not None:
+        params["ui"] = bool(ui)
+    result = ctx.client.call("editor.screenshot", params)
+    return f"Screenshot requested -> {result.get('image')}\n{result.get('note', '')}".strip()

@@ -41,6 +41,7 @@ void FClaudeBlueprintAgentModule::StartupModule()
 	RegisterGraphCommands(*Registry);
 	RegisterWidgetCommands(*Registry);
 	RegisterBatchCommand(*Registry);
+	RegisterEditorCommands(*Registry);
 
 	ChangeTracker = MakeUnique<FAgentChangeTracker>();
 	Server = MakeUnique<FAgentServer>(*this);
