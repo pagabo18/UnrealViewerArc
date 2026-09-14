@@ -309,7 +309,7 @@ namespace
 
 	// ------------------------------------------------------------------ inspection
 
-	FAgentResult Summary(const FJsonObject& Params, FAgentContext& Context)
+	FAgentResult Cmd_Summary(const FJsonObject& Params, FAgentContext& Context)
 	{
 		FAgentResult Error;
 		UBlueprint* Blueprint = AgentCmd::RequireBlueprint(Params, Error);
@@ -356,7 +356,7 @@ namespace
 		return FAgentResult::Ok(Json);
 	}
 
-	FAgentResult Structure(const FJsonObject& Params, FAgentContext& Context)
+	FAgentResult Cmd_Structure(const FJsonObject& Params, FAgentContext& Context)
 	{
 		FAgentResult Error;
 		UBlueprint* Blueprint = AgentCmd::RequireBlueprint(Params, Error);
@@ -438,7 +438,7 @@ namespace
 	}
 
 	/** Compact cross-reference entry used by the server-side index. */
-	FAgentResult IndexEntry(const FJsonObject& Params, FAgentContext& Context)
+	FAgentResult Cmd_IndexEntry(const FJsonObject& Params, FAgentContext& Context)
 	{
 		FAgentResult Error;
 		UBlueprint* Blueprint = AgentCmd::RequireBlueprint(Params, Error);
@@ -518,7 +518,7 @@ namespace
 		return FAgentResult::Ok(Json);
 	}
 
-	FAgentResult Components(const FJsonObject& Params, FAgentContext& Context)
+	FAgentResult Cmd_Components(const FJsonObject& Params, FAgentContext& Context)
 	{
 		FAgentResult Error;
 		UBlueprint* Blueprint = AgentCmd::RequireBlueprint(Params, Error);
@@ -530,7 +530,7 @@ namespace
 
 	// ------------------------------------------------------------------ variables
 
-	FAgentResult VariableOp(const FJsonObject& Params, FAgentContext& Context)
+	FAgentResult Cmd_VariableOp(const FJsonObject& Params, FAgentContext& Context)
 	{
 		FAgentResult Error;
 		UBlueprint* Blueprint = AgentCmd::RequireBlueprint(Params, Error);
@@ -707,7 +707,7 @@ namespace
 		return nullptr;
 	}
 
-	FAgentResult FunctionOp(const FJsonObject& Params, FAgentContext& Context)
+	FAgentResult Cmd_FunctionOp(const FJsonObject& Params, FAgentContext& Context)
 	{
 		FAgentResult Error;
 		UBlueprint* Blueprint = AgentCmd::RequireBlueprint(Params, Error);
@@ -877,7 +877,8 @@ namespace
 				bool bRemoved = false;
 				if (Entry->FindPin(FName(*PinName)) != nullptr)
 				{
-					bRemoved = Entry->RemoveUserDefinedPinByName(FName(*PinName));
+					Entry->RemoveUserDefinedPinByName(FName(*PinName));
+					bRemoved = true;
 				}
 				if (!bRemoved)
 				{
@@ -885,8 +886,9 @@ namespace
 					{
 						if (UK2Node_FunctionResult* Result = Cast<UK2Node_FunctionResult>(Node))
 						{
-							if (Result->RemoveUserDefinedPinByName(FName(*PinName)))
+							if (Result->FindPin(FName(*PinName)) != nullptr)
 							{
+								Result->RemoveUserDefinedPinByName(FName(*PinName));
 								bRemoved = true;
 							}
 						}
@@ -935,7 +937,7 @@ namespace
 
 	// ------------------------------------------------------------------ interfaces
 
-	FAgentResult InterfaceOp(const FJsonObject& Params, FAgentContext& Context)
+	FAgentResult Cmd_InterfaceOp(const FJsonObject& Params, FAgentContext& Context)
 	{
 		FAgentResult Error;
 		UBlueprint* Blueprint = AgentCmd::RequireBlueprint(Params, Error);
@@ -976,7 +978,7 @@ namespace
 
 	// ------------------------------------------------------------------ components
 
-	FAgentResult ComponentOp(const FJsonObject& Params, FAgentContext& Context)
+	FAgentResult Cmd_ComponentOp(const FJsonObject& Params, FAgentContext& Context)
 	{
 		FAgentResult Error;
 		UBlueprint* Blueprint = AgentCmd::RequireBlueprint(Params, Error);
@@ -1094,7 +1096,7 @@ namespace
 
 	// ------------------------------------------------------------------ build
 
-	FAgentResult Compile(const FJsonObject& Params, FAgentContext& Context)
+	FAgentResult Cmd_Compile(const FJsonObject& Params, FAgentContext& Context)
 	{
 		TArray<FString> Specs = AgentJson::GetStringOrArray(Params, TEXT("assets"));
 		if (Specs.Num() == 0)
@@ -1153,7 +1155,7 @@ namespace
 		return FAgentResult::Ok(Json);
 	}
 
-	FAgentResult Save(const FJsonObject& Params, FAgentContext& Context)
+	FAgentResult Cmd_Save(const FJsonObject& Params, FAgentContext& Context)
 	{
 		TArray<FString> Specs = AgentJson::GetStringOrArray(Params, TEXT("assets"));
 		if (Specs.Num() == 0)
@@ -1193,7 +1195,7 @@ namespace
 		return FAgentResult::Ok(Json);
 	}
 
-	FAgentResult Validate(const FJsonObject& Params, FAgentContext& Context)
+	FAgentResult Cmd_Validate(const FJsonObject& Params, FAgentContext& Context)
 	{
 		TArray<FString> Specs = AgentJson::GetStringOrArray(Params, TEXT("assets"));
 		if (Specs.Num() == 0)
@@ -1236,7 +1238,7 @@ namespace
 		return FAgentResult::Ok(Json);
 	}
 
-	FAgentResult Reload(const FJsonObject& Params, FAgentContext& Context)
+	FAgentResult Cmd_Reload(const FJsonObject& Params, FAgentContext& Context)
 	{
 		// Re-read from disk: discards unsaved in-memory changes for the asset.
 		FAgentResult Error;
@@ -1255,16 +1257,16 @@ namespace
 
 void RegisterBlueprintCommands(FAgentCommandRegistry& Registry)
 {
-	Registry.Register(TEXT("blueprint.summary"), TEXT("Counts, parent, interfaces, refs (< 300 tokens)."), false, &Summary);
-	Registry.Register(TEXT("blueprint.structure"), TEXT("Functions, variables, graphs, components, events."), false, &Structure);
-	Registry.Register(TEXT("blueprint.index_entry"), TEXT("Cross-reference entry (calls/reads/writes) for the index."), false, &IndexEntry);
-	Registry.Register(TEXT("blueprint.components"), TEXT("Components with non-default properties."), false, &Components);
-	Registry.Register(TEXT("blueprint.variable"), TEXT("op=add|remove|rename|modify a member variable."), true, &VariableOp);
-	Registry.Register(TEXT("blueprint.function"), TEXT("op=create|delete|rename|modify a function (inputs/outputs/pure)."), true, &FunctionOp);
-	Registry.Register(TEXT("blueprint.interface"), TEXT("op=add|remove an implemented interface."), true, &InterfaceOp);
-	Registry.Register(TEXT("blueprint.component"), TEXT("op=add|remove|modify a component (class, parent, properties)."), true, &ComponentOp);
-	Registry.Register(TEXT("blueprint.compile"), TEXT("Compile assets; optional save/validate."), true, &Compile);
-	Registry.Register(TEXT("blueprint.save"), TEXT("Save assets through the editor pipeline."), true, &Save);
-	Registry.Register(TEXT("blueprint.validate"), TEXT("Run DataValidation on assets."), false, &Validate);
-	Registry.Register(TEXT("blueprint.reload"), TEXT("Reload asset from disk (discard unsaved changes)."), true, &Reload);
+	Registry.Register(TEXT("blueprint.summary"), TEXT("Counts, parent, interfaces, refs (< 300 tokens)."), false, &Cmd_Summary);
+	Registry.Register(TEXT("blueprint.structure"), TEXT("Functions, variables, graphs, components, events."), false, &Cmd_Structure);
+	Registry.Register(TEXT("blueprint.index_entry"), TEXT("Cross-reference entry (calls/reads/writes) for the index."), false, &Cmd_IndexEntry);
+	Registry.Register(TEXT("blueprint.components"), TEXT("Components with non-default properties."), false, &Cmd_Components);
+	Registry.Register(TEXT("blueprint.variable"), TEXT("op=add|remove|rename|modify a member variable."), true, &Cmd_VariableOp);
+	Registry.Register(TEXT("blueprint.function"), TEXT("op=create|delete|rename|modify a function (inputs/outputs/pure)."), true, &Cmd_FunctionOp);
+	Registry.Register(TEXT("blueprint.interface"), TEXT("op=add|remove an implemented interface."), true, &Cmd_InterfaceOp);
+	Registry.Register(TEXT("blueprint.component"), TEXT("op=add|remove|modify a component (class, parent, properties)."), true, &Cmd_ComponentOp);
+	Registry.Register(TEXT("blueprint.compile"), TEXT("Compile assets; optional save/validate."), true, &Cmd_Compile);
+	Registry.Register(TEXT("blueprint.save"), TEXT("Save assets through the editor pipeline."), true, &Cmd_Save);
+	Registry.Register(TEXT("blueprint.validate"), TEXT("Run DataValidation on assets."), false, &Cmd_Validate);
+	Registry.Register(TEXT("blueprint.reload"), TEXT("Reload asset from disk (discard unsaved changes)."), true, &Cmd_Reload);
 }

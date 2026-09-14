@@ -53,7 +53,7 @@ namespace
 		{ TEXT("Editor.Batch"), TEXT("supported") },
 	};
 
-	FAgentResult Ping(const FJsonObject& Params, FAgentContext& Context)
+	FAgentResult Cmd_Ping(const FJsonObject& Params, FAgentContext& Context)
 	{
 		TSharedRef<FJsonObject> Json = AgentJson::Obj();
 		Json->SetStringField(TEXT("project"), FAgentConfig::GetProjectName());
@@ -72,7 +72,7 @@ namespace
 		return FAgentResult::Ok(Json);
 	}
 
-	FAgentResult Capabilities(const FJsonObject& Params, FAgentContext& Context)
+	FAgentResult Cmd_Capabilities(const FJsonObject& Params, FAgentContext& Context)
 	{
 		TSharedRef<FJsonObject> Json = AgentJson::Obj();
 		TSharedRef<FJsonObject> Caps = AgentJson::Obj();
@@ -87,14 +87,14 @@ namespace
 		return FAgentResult::Ok(Json);
 	}
 
-	FAgentResult Changes(const FJsonObject& Params, FAgentContext& Context)
+	FAgentResult Cmd_Changes(const FJsonObject& Params, FAgentContext& Context)
 	{
 		const uint64 Since = static_cast<uint64>(AgentJson::GetNumber(Params, TEXT("since"), 0));
 		const int32 Max = FMath::Clamp(AgentJson::GetInt(Params, TEXT("limit"), 200), 1, 2000);
 		return FAgentResult::Ok(Context.ChangeTracker->GetSince(Since, Max));
 	}
 
-	FAgentResult Log(const FJsonObject& Params, FAgentContext& Context)
+	FAgentResult Cmd_Log(const FJsonObject& Params, FAgentContext& Context)
 	{
 		const FString Level = AgentJson::GetString(Params, TEXT("level"), TEXT("error"));
 		const FString Category = AgentJson::GetString(Params, TEXT("category"));
@@ -138,7 +138,7 @@ namespace
 		return Json;
 	}
 
-	FAgentResult Undo(const FJsonObject& Params, FAgentContext& Context)
+	FAgentResult Cmd_Undo(const FJsonObject& Params, FAgentContext& Context)
 	{
 		const int32 Steps = FMath::Clamp(AgentJson::GetInt(Params, TEXT("steps"), 1), 1, 50);
 		int32 Done = 0;
@@ -166,7 +166,7 @@ namespace
 		return FAgentResult::Ok(Json);
 	}
 
-	FAgentResult Redo(const FJsonObject& Params, FAgentContext& Context)
+	FAgentResult Cmd_Redo(const FJsonObject& Params, FAgentContext& Context)
 	{
 		const int32 Steps = FMath::Clamp(AgentJson::GetInt(Params, TEXT("steps"), 1), 1, 50);
 		int32 Done = 0;
@@ -183,12 +183,12 @@ namespace
 		return FAgentResult::Ok(Json);
 	}
 
-	FAgentResult Transactions(const FJsonObject& Params, FAgentContext& Context)
+	FAgentResult Cmd_Transactions(const FJsonObject& Params, FAgentContext& Context)
 	{
 		return FAgentResult::Ok(TransactionState(FMath::Clamp(AgentJson::GetInt(Params, TEXT("limit"), 10), 1, 100)));
 	}
 
-	FAgentResult Config(const FJsonObject& Params, FAgentContext& Context)
+	FAgentResult Cmd_Config(const FJsonObject& Params, FAgentContext& Context)
 	{
 		TSharedRef<FJsonObject> Json = Context.Config->ToJson();
 		Json->SetStringField(TEXT("configFile"), FAgentConfig::GetConfigFile());
@@ -196,7 +196,7 @@ namespace
 		return FAgentResult::Ok(Json);
 	}
 
-	FAgentResult CollectGarbage(const FJsonObject& Params, FAgentContext& Context)
+	FAgentResult Cmd_CollectGarbage(const FJsonObject& Params, FAgentContext& Context)
 	{
 		::CollectGarbage(GARBAGE_COLLECTION_KEEPFLAGS);
 		return FAgentResult::Ok();
@@ -205,13 +205,13 @@ namespace
 
 void RegisterSystemCommands(FAgentCommandRegistry& Registry)
 {
-	Registry.Register(TEXT("system.ping"), TEXT("Editor/project/plugin status."), false, &Ping);
-	Registry.Register(TEXT("system.capabilities"), TEXT("Capability registry + command list."), false, &Capabilities);
-	Registry.Register(TEXT("system.changes"), TEXT("Change events since a sequence number."), false, &Changes);
-	Registry.Register(TEXT("system.log"), TEXT("Captured errors/warnings (counts + slice)."), false, &Log);
-	Registry.Register(TEXT("system.undo"), TEXT("Undo N editor transactions."), true, &Undo);
-	Registry.Register(TEXT("system.redo"), TEXT("Redo N editor transactions."), true, &Redo);
-	Registry.Register(TEXT("system.transactions"), TEXT("Undo stack titles."), false, &Transactions);
-	Registry.Register(TEXT("system.config"), TEXT("Effective plugin configuration."), false, &Config);
-	Registry.Register(TEXT("system.gc"), TEXT("Force garbage collection."), false, &CollectGarbage);
+	Registry.Register(TEXT("system.ping"), TEXT("Editor/project/plugin status."), false, &Cmd_Ping);
+	Registry.Register(TEXT("system.capabilities"), TEXT("Capability registry + command list."), false, &Cmd_Capabilities);
+	Registry.Register(TEXT("system.changes"), TEXT("Change events since a sequence number."), false, &Cmd_Changes);
+	Registry.Register(TEXT("system.log"), TEXT("Captured errors/warnings (counts + slice)."), false, &Cmd_Log);
+	Registry.Register(TEXT("system.undo"), TEXT("Undo N editor transactions."), true, &Cmd_Undo);
+	Registry.Register(TEXT("system.redo"), TEXT("Redo N editor transactions."), true, &Cmd_Redo);
+	Registry.Register(TEXT("system.transactions"), TEXT("Undo stack titles."), false, &Cmd_Transactions);
+	Registry.Register(TEXT("system.config"), TEXT("Effective plugin configuration."), false, &Cmd_Config);
+	Registry.Register(TEXT("system.gc"), TEXT("Force garbage collection."), false, &Cmd_CollectGarbage);
 }

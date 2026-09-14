@@ -17,6 +17,7 @@
 #include "UObject/UObjectIterator.h"
 #include "UObject/Package.h"
 #include "UObject/Class.h"
+#include <type_traits>
 
 FString FUnrealAdapterBase::GetEngineVersion() const
 {
@@ -65,7 +66,8 @@ bool FUnrealAdapterBase::ValidateAsset(UObject* Asset, TArray<FString>& OutError
 	}
 	else
 	{
-		Result = Asset->IsDataValid(Context);
+		const UObject* ConstAsset = Asset;
+		Result = ConstAsset->IsDataValid(Context);
 	}
 	for (const FDataValidationContext::FIssue& Issue : Context.GetIssues())
 	{
@@ -167,13 +169,16 @@ T* FUnrealAdapterBase::ResolveTypeGeneric(const FString& InSpec) const
 		{
 			AssetPath += TEXT(".") + FPackageName::GetShortName(AssetPath);
 		}
-		if (UBlueprint* Blueprint = LoadObject<UBlueprint>(nullptr, *AssetPath))
+		if constexpr (std::is_same_v<T, UClass>)
 		{
-			return Cast<T>(Blueprint->GeneratedClass);
-		}
-		if (!Spec.EndsWith(TEXT("_C")))
-		{
-			return FindObject<T>(nullptr, *(AssetPath + TEXT("_C")));
+			if (UBlueprint* Blueprint = LoadObject<UBlueprint>(nullptr, *AssetPath))
+			{
+				return Blueprint->GeneratedClass.Get();
+			}
+			if (!Spec.EndsWith(TEXT("_C")))
+			{
+				return FindObject<T>(nullptr, *(AssetPath + TEXT("_C")));
+			}
 		}
 		return nullptr;
 	}

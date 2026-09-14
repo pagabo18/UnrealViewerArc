@@ -20,6 +20,7 @@
 #include "MovieScene.h"
 #include "MovieSceneTrack.h"
 #include "MovieSceneBinding.h"
+#include "MovieScenePossessable.h"
 #include "Slate/WidgetRenderer.h"
 #include "Engine/TextureRenderTarget2D.h"
 #include "TextureResource.h"
@@ -207,7 +208,7 @@ namespace
 
 	// ------------------------------------------------------------------ tree / inspect
 
-	FAgentResult Tree(const FJsonObject& Params, FAgentContext& Context)
+	FAgentResult Cmd_Tree(const FJsonObject& Params, FAgentContext& Context)
 	{
 		FAgentResult Error;
 		UWidgetBlueprint* WidgetBlueprint = RequireWidgetBlueprint(Params, Error);
@@ -310,7 +311,7 @@ namespace
 		return FAgentResult::Ok(Json);
 	}
 
-	FAgentResult Inspect(const FJsonObject& Params, FAgentContext& Context)
+	FAgentResult Cmd_Inspect(const FJsonObject& Params, FAgentContext& Context)
 	{
 		FAgentResult Error;
 		UWidgetBlueprint* WidgetBlueprint = RequireWidgetBlueprint(Params, Error);
@@ -500,7 +501,7 @@ namespace
 		return Parent->InsertChildAt(Index, Widget);
 	}
 
-	FAgentResult Clone(const FJsonObject& Params, FAgentContext& Context)
+	FAgentResult Cmd_Clone(const FJsonObject& Params, FAgentContext& Context)
 	{
 		FAgentResult Error;
 		UWidgetBlueprint* WidgetBlueprint = RequireWidgetBlueprint(Params, Error);
@@ -613,7 +614,7 @@ namespace
 		return FAgentResult::Ok(Json);
 	}
 
-	FAgentResult Add(const FJsonObject& Params, FAgentContext& Context)
+	FAgentResult Cmd_Add(const FJsonObject& Params, FAgentContext& Context)
 	{
 		FAgentResult Error;
 		UWidgetBlueprint* WidgetBlueprint = RequireWidgetBlueprint(Params, Error);
@@ -671,7 +672,7 @@ namespace
 		return FAgentResult::Ok(Json);
 	}
 
-	FAgentResult Remove(const FJsonObject& Params, FAgentContext& Context)
+	FAgentResult Cmd_Remove(const FJsonObject& Params, FAgentContext& Context)
 	{
 		FAgentResult Error;
 		UWidgetBlueprint* WidgetBlueprint = RequireWidgetBlueprint(Params, Error);
@@ -711,7 +712,7 @@ namespace
 		return FAgentResult::Ok(Json);
 	}
 
-	FAgentResult Move(const FJsonObject& Params, FAgentContext& Context)
+	FAgentResult Cmd_Move(const FJsonObject& Params, FAgentContext& Context)
 	{
 		FAgentResult Error;
 		UWidgetBlueprint* WidgetBlueprint = RequireWidgetBlueprint(Params, Error);
@@ -757,7 +758,7 @@ namespace
 		return FAgentResult::Ok(Json);
 	}
 
-	FAgentResult Set(const FJsonObject& Params, FAgentContext& Context)
+	FAgentResult Cmd_Set(const FJsonObject& Params, FAgentContext& Context)
 	{
 		FAgentResult Error;
 		UWidgetBlueprint* WidgetBlueprint = RequireWidgetBlueprint(Params, Error);
@@ -827,7 +828,7 @@ namespace
 		return FAgentResult::Ok(Json);
 	}
 
-	FAgentResult CopyStyle(const FJsonObject& Params, FAgentContext& Context)
+	FAgentResult Cmd_CopyStyle(const FJsonObject& Params, FAgentContext& Context)
 	{
 		FAgentResult Error;
 		UWidgetBlueprint* WidgetBlueprint = RequireWidgetBlueprint(Params, Error);
@@ -879,7 +880,7 @@ namespace
 
 	// ------------------------------------------------------------------ events
 
-	FAgentResult BindEvent(const FJsonObject& Params, FAgentContext& Context)
+	FAgentResult Cmd_BindEvent(const FJsonObject& Params, FAgentContext& Context)
 	{
 		FAgentResult Error;
 		UWidgetBlueprint* WidgetBlueprint = RequireWidgetBlueprint(Params, Error);
@@ -1028,7 +1029,7 @@ namespace
 
 	// ------------------------------------------------------------------ animations
 
-	FAgentResult Animations(const FJsonObject& Params, FAgentContext& Context)
+	FAgentResult Cmd_Animations(const FJsonObject& Params, FAgentContext& Context)
 	{
 		FAgentResult Error;
 		UWidgetBlueprint* WidgetBlueprint = RequireWidgetBlueprint(Params, Error);
@@ -1042,7 +1043,7 @@ namespace
 			if (!Filter.IsEmpty() && !AnimName.Equals(Filter, ESearchCase::IgnoreCase) && !Animation->GetName().Equals(Filter, ESearchCase::IgnoreCase)) { continue; }
 			TSharedRef<FJsonObject> Item = AgentJson::Obj();
 			Item->SetStringField(TEXT("name"), AnimName);
-			UMovieScene* Scene = Animation->GetMovieScene();
+			const UMovieScene* Scene = Animation->GetMovieScene();
 			if (Scene)
 			{
 				const TRange<FFrameNumber> Range = Scene->GetPlaybackRange();
@@ -1052,7 +1053,11 @@ namespace
 				for (const FMovieSceneBinding& Binding : Scene->GetBindings())
 				{
 					TSharedRef<FJsonObject> B = AgentJson::Obj();
-					FString WidgetName = Binding.GetName();
+					FString WidgetName;
+					if (const FMovieScenePossessable* Possessable = Scene->FindPossessable(Binding.GetObjectGuid()))
+					{
+						WidgetName = Possessable->GetName();
+					}
 					for (const FWidgetAnimationBinding& WidgetBinding : Animation->AnimationBindings)
 					{
 						if (WidgetBinding.AnimationGuid == Binding.GetObjectGuid())
@@ -1085,7 +1090,7 @@ namespace
 
 	// ------------------------------------------------------------------ preview
 
-	FAgentResult Preview(const FJsonObject& Params, FAgentContext& Context)
+	FAgentResult Cmd_Preview(const FJsonObject& Params, FAgentContext& Context)
 	{
 		FAgentResult Error;
 		UWidgetBlueprint* WidgetBlueprint = RequireWidgetBlueprint(Params, Error);
@@ -1192,7 +1197,7 @@ namespace
 		return FAgentResult::Ok(Json);
 	}
 
-	FAgentResult PreviewDiff(const FJsonObject& Params, FAgentContext& Context)
+	FAgentResult Cmd_PreviewDiff(const FJsonObject& Params, FAgentContext& Context)
 	{
 		FString PathA, PathB;
 		FAgentResult Error;
@@ -1250,16 +1255,16 @@ namespace
 
 void RegisterWidgetCommands(FAgentCommandRegistry& Registry)
 {
-	Registry.Register(TEXT("widget.tree"), TEXT("Widget hierarchy with style fingerprints."), false, &Tree);
-	Registry.Register(TEXT("widget.inspect"), TEXT("One widget's non-default properties, slot, events."), false, &Inspect);
-	Registry.Register(TEXT("widget.clone"), TEXT("Deep-clone a widget subtree (style preserved) into a parent/after a sibling."), true, &Clone);
-	Registry.Register(TEXT("widget.add"), TEXT("Add a new widget of a class under a parent."), true, &Add);
-	Registry.Register(TEXT("widget.remove"), TEXT("Remove widgets (and their subtrees)."), true, &Remove);
-	Registry.Register(TEXT("widget.move"), TEXT("Reparent/reorder a widget."), true, &Move);
-	Registry.Register(TEXT("widget.set"), TEXT("Set widget/slot properties, rename, variable flag."), true, &Set);
-	Registry.Register(TEXT("widget.copy_style"), TEXT("Copy style properties from one widget to others."), true, &CopyStyle);
-	Registry.Register(TEXT("widget.bind_event"), TEXT("Create a bound event node (e.g. OnClicked), optionally calling/creating a function."), true, &BindEvent);
-	Registry.Register(TEXT("widget.animations"), TEXT("List animations with bindings/tracks (read-only)."), false, &Animations);
-	Registry.Register(TEXT("widget.preview"), TEXT("Render the widget to PNG + layout rectangles."), false, &Preview);
-	Registry.Register(TEXT("widget.preview_diff"), TEXT("Pixel diff between two PNGs (percent + bbox)."), false, &PreviewDiff);
+	Registry.Register(TEXT("widget.tree"), TEXT("Widget hierarchy with style fingerprints."), false, &Cmd_Tree);
+	Registry.Register(TEXT("widget.inspect"), TEXT("One widget's non-default properties, slot, events."), false, &Cmd_Inspect);
+	Registry.Register(TEXT("widget.clone"), TEXT("Deep-clone a widget subtree (style preserved) into a parent/after a sibling."), true, &Cmd_Clone);
+	Registry.Register(TEXT("widget.add"), TEXT("Add a new widget of a class under a parent."), true, &Cmd_Add);
+	Registry.Register(TEXT("widget.remove"), TEXT("Remove widgets (and their subtrees)."), true, &Cmd_Remove);
+	Registry.Register(TEXT("widget.move"), TEXT("Reparent/reorder a widget."), true, &Cmd_Move);
+	Registry.Register(TEXT("widget.set"), TEXT("Set widget/slot properties, rename, variable flag."), true, &Cmd_Set);
+	Registry.Register(TEXT("widget.copy_style"), TEXT("Copy style properties from one widget to others."), true, &Cmd_CopyStyle);
+	Registry.Register(TEXT("widget.bind_event"), TEXT("Create a bound event node (e.g. OnClicked), optionally calling/creating a function."), true, &Cmd_BindEvent);
+	Registry.Register(TEXT("widget.animations"), TEXT("List animations with bindings/tracks (read-only)."), false, &Cmd_Animations);
+	Registry.Register(TEXT("widget.preview"), TEXT("Render the widget to PNG + layout rectangles."), false, &Cmd_Preview);
+	Registry.Register(TEXT("widget.preview_diff"), TEXT("Pixel diff between two PNGs (percent + bbox)."), false, &Cmd_PreviewDiff);
 }

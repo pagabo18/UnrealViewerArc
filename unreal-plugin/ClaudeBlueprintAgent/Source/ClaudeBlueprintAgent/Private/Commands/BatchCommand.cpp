@@ -8,7 +8,7 @@
 
 namespace
 {
-	FAgentResult Batch(const FJsonObject& Params, FAgentContext& Context)
+	FAgentResult Cmd_Batch(const FJsonObject& Params, FAgentContext& Context)
 	{
 		const TArray<TSharedPtr<FJsonValue>>* Ops = AgentJson::GetArray(Params, TEXT("ops"));
 		if (!Ops || Ops->Num() == 0)
@@ -107,5 +107,5 @@ namespace
 
 void RegisterBatchCommand(FAgentCommandRegistry& Registry)
 {
-	Registry.Register(TEXT("batch"), TEXT("Run ops[] in one transaction; atomic=true rolls back on failure."), true, &Batch);
+	Registry.Register(TEXT("batch"), TEXT("Run ops[] in one transaction; atomic=true rolls back on failure."), true, &Cmd_Batch);
 }

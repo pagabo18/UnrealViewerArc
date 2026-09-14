@@ -143,7 +143,7 @@ namespace AgentResolver
 		OutGraphs.Reset();
 		if (Blueprint)
 		{
-			FBlueprintEditorUtils::GetAllGraphs(Blueprint, OutGraphs);
+			Blueprint->GetAllGraphs(OutGraphs);
 		}
 	}
 

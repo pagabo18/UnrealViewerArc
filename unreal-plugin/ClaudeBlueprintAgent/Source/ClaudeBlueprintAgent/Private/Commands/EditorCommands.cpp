@@ -9,7 +9,7 @@
 
 namespace
 {
-	FAgentResult Screenshot(const FJsonObject& Params, FAgentContext& Context)
+	FAgentResult Cmd_Screenshot(const FJsonObject& Params, FAgentContext& Context)
 	{
 		if (!GEditor)
 		{
@@ -34,5 +34,5 @@ namespace
 
 void RegisterEditorCommands(FAgentCommandRegistry& Registry)
 {
-	Registry.Register(TEXT("editor.screenshot"), TEXT("Request an editor viewport screenshot (async, experimental)."), false, &Screenshot);
+	Registry.Register(TEXT("editor.screenshot"), TEXT("Request an editor viewport screenshot (async, experimental)."), false, &Cmd_Screenshot);
 }

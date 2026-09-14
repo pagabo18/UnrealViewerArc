@@ -6,7 +6,7 @@
 class UBlueprint;
 class UPackage;
 struct FAssetData;
-struct FObjectPostSaveContext;
+class FObjectPostSaveContext;
 
 /**
  * Records asset-level change events (modified/compiled/saved/added/removed/renamed)

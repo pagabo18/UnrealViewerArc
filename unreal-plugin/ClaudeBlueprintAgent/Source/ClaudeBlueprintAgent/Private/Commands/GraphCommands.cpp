@@ -30,7 +30,6 @@
 #include "K2Node_SwitchString.h"
 #include "K2Node_SwitchInteger.h"
 #include "K2Node_SpawnActorFromClass.h"
-#include "K2Node_CreateWidget.h"
 #include "K2Node_Literal.h"
 #include "K2Node_CallParentFunction.h"
 #include "K2Node_FunctionEntry.h"
@@ -483,7 +482,12 @@ namespace
 		}
 		if (Type == TEXT("create_widget"))
 		{
-			OutNode = PlaceNode<UK2Node_CreateWidget>(Graph, X, Y, [](UK2Node_CreateWidget*) {});
+			UClass* CreateWidgetClass = Context.Adapter->ResolveClass(TEXT("/Script/UMGEditor.K2Node_CreateWidget"));
+			if (!CreateWidgetClass)
+			{
+				return FAgentResult::Unsupported(TEXT("K2Node_CreateWidget class not available."), TEXT("Blueprint.EditGraph"));
+			}
+			OutNode = PlaceGenericNode(Graph, CreateWidgetClass, X, Y);
 			const FString ClassSpec = AgentJson::GetString(Spec, TEXT("class"));
 			if (!ClassSpec.IsEmpty())
 			{
@@ -625,7 +629,7 @@ namespace
 
 	// ------------------------------------------------------------------ commands
 
-	FAgentResult Inspect(const FJsonObject& Params, FAgentContext& Context)
+	FAgentResult Cmd_Inspect(const FJsonObject& Params, FAgentContext& Context)
 	{
 		FGraphTarget Target;
 		FAgentResult Error;
@@ -643,7 +647,7 @@ namespace
 		return FAgentResult::Ok(AgentGraph::SerializeGraph(Target.Blueprint, Target.Graph, Filter));
 	}
 
-	FAgentResult Graphs(const FJsonObject& Params, FAgentContext& Context)
+	FAgentResult Cmd_Graphs(const FJsonObject& Params, FAgentContext& Context)
 	{
 		FAgentResult Error;
 		UBlueprint* Blueprint = AgentCmd::RequireBlueprint(Params, Error);
@@ -660,7 +664,7 @@ namespace
 		return FAgentResult::Ok(Json);
 	}
 
-	FAgentResult FindNodes(const FJsonObject& Params, FAgentContext& Context)
+	FAgentResult Cmd_FindNodes(const FJsonObject& Params, FAgentContext& Context)
 	{
 		FGraphTarget Target;
 		FAgentResult Error;
@@ -715,7 +719,7 @@ namespace
 		return FAgentResult::Ok(Json);
 	}
 
-	FAgentResult AddNode(const FJsonObject& Params, FAgentContext& Context)
+	FAgentResult Cmd_AddNode(const FJsonObject& Params, FAgentContext& Context)
 	{
 		FGraphTarget Target;
 		FAgentResult Error;
@@ -837,7 +841,7 @@ namespace
 		return FAgentResult::Ok(Json);
 	}
 
-	FAgentResult DeleteNodes(const FJsonObject& Params, FAgentContext& Context)
+	FAgentResult Cmd_DeleteNodes(const FJsonObject& Params, FAgentContext& Context)
 	{
 		FGraphTarget Target;
 		FAgentResult Error;
@@ -904,7 +908,7 @@ namespace
 		return FAgentResult::Ok(Json);
 	}
 
-	FAgentResult Connect(const FJsonObject& Params, FAgentContext& Context)
+	FAgentResult Cmd_Connect(const FJsonObject& Params, FAgentContext& Context)
 	{
 		FGraphTarget Target;
 		FAgentResult Error;
@@ -968,7 +972,7 @@ namespace
 		return FAgentResult::Ok(Json);
 	}
 
-	FAgentResult Disconnect(const FJsonObject& Params, FAgentContext& Context)
+	FAgentResult Cmd_Disconnect(const FJsonObject& Params, FAgentContext& Context)
 	{
 		FGraphTarget Target;
 		FAgentResult Error;
@@ -1013,7 +1017,7 @@ namespace
 		return FAgentResult::Ok(Json);
 	}
 
-	FAgentResult SetPins(const FJsonObject& Params, FAgentContext& Context)
+	FAgentResult Cmd_SetPins(const FJsonObject& Params, FAgentContext& Context)
 	{
 		FGraphTarget Target;
 		FAgentResult Error;
@@ -1060,7 +1064,7 @@ namespace
 		return FAgentResult::Ok(Json);
 	}
 
-	FAgentResult ReplaceNode(const FJsonObject& Params, FAgentContext& Context)
+	FAgentResult Cmd_ReplaceNode(const FJsonObject& Params, FAgentContext& Context)
 	{
 		FGraphTarget Target;
 		FAgentResult Error;
@@ -1140,7 +1144,7 @@ namespace
 		return FAgentResult::Ok(Json);
 	}
 
-	FAgentResult CloneNodes(const FJsonObject& Params, FAgentContext& Context)
+	FAgentResult Cmd_CloneNodes(const FJsonObject& Params, FAgentContext& Context)
 	{
 		FGraphTarget Target;
 		FAgentResult Error;
@@ -1229,7 +1233,7 @@ namespace
 		return FAgentResult::Ok(Json);
 	}
 
-	FAgentResult LocalVariable(const FJsonObject& Params, FAgentContext& Context)
+	FAgentResult Cmd_LocalVariable(const FJsonObject& Params, FAgentContext& Context)
 	{
 		FGraphTarget Target;
 		FAgentResult Error;
@@ -1257,15 +1261,15 @@ namespace
 
 void RegisterGraphCommands(FAgentCommandRegistry& Registry)
 {
-	Registry.Register(TEXT("graph.list"), TEXT("Graphs of a blueprint with node counts."), false, &Graphs);
-	Registry.Register(TEXT("graph.inspect"), TEXT("Nodes of a graph; supports around/depth/query/kind/offset/limit."), false, &Inspect);
-	Registry.Register(TEXT("graph.find_nodes"), TEXT("Search nodes across all graphs by query/kind."), false, &FindNodes);
-	Registry.Register(TEXT("graph.add_node"), TEXT("Create a node (type=function_call|variable_get|...); optional after/before/pins/connect."), true, &AddNode);
-	Registry.Register(TEXT("graph.delete_nodes"), TEXT("Delete nodes; bridges exec flow by default."), true, &DeleteNodes);
-	Registry.Register(TEXT("graph.connect"), TEXT("Connect pins: from/to 'GUID.Pin' or links[]."), true, &Connect);
-	Registry.Register(TEXT("graph.disconnect"), TEXT("Break links: pin (all) or from+to."), true, &Disconnect);
-	Registry.Register(TEXT("graph.set_pins"), TEXT("Set pin defaults / comment / position / enabled on a node."), true, &SetPins);
-	Registry.Register(TEXT("graph.replace_node"), TEXT("Replace a node with a new one, migrating links."), true, &ReplaceNode);
-	Registry.Register(TEXT("graph.clone_nodes"), TEXT("Duplicate nodes (keeps internal links)."), true, &CloneNodes);
-	Registry.Register(TEXT("graph.local_variable"), TEXT("Add a local variable to a function graph."), true, &LocalVariable);
+	Registry.Register(TEXT("graph.list"), TEXT("Graphs of a blueprint with node counts."), false, &Cmd_Graphs);
+	Registry.Register(TEXT("graph.inspect"), TEXT("Nodes of a graph; supports around/depth/query/kind/offset/limit."), false, &Cmd_Inspect);
+	Registry.Register(TEXT("graph.find_nodes"), TEXT("Search nodes across all graphs by query/kind."), false, &Cmd_FindNodes);
+	Registry.Register(TEXT("graph.add_node"), TEXT("Create a node (type=function_call|variable_get|...); optional after/before/pins/connect."), true, &Cmd_AddNode);
+	Registry.Register(TEXT("graph.delete_nodes"), TEXT("Delete nodes; bridges exec flow by default."), true, &Cmd_DeleteNodes);
+	Registry.Register(TEXT("graph.connect"), TEXT("Connect pins: from/to 'GUID.Pin' or links[]."), true, &Cmd_Connect);
+	Registry.Register(TEXT("graph.disconnect"), TEXT("Break links: pin (all) or from+to."), true, &Cmd_Disconnect);
+	Registry.Register(TEXT("graph.set_pins"), TEXT("Set pin defaults / comment / position / enabled on a node."), true, &Cmd_SetPins);
+	Registry.Register(TEXT("graph.replace_node"), TEXT("Replace a node with a new one, migrating links."), true, &Cmd_ReplaceNode);
+	Registry.Register(TEXT("graph.clone_nodes"), TEXT("Duplicate nodes (keeps internal links)."), true, &Cmd_CloneNodes);
+	Registry.Register(TEXT("graph.local_variable"), TEXT("Add a local variable to a function graph."), true, &Cmd_LocalVariable);
 }

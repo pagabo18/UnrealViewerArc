@@ -13,7 +13,7 @@
 #include "Blueprint/WidgetTree.h"
 #include "Components/PanelWidget.h"
 #include "Components/CanvasPanel.h"
-#include "WidgetBlueprintGeneratedClass.h"
+#include "Blueprint/WidgetBlueprintGeneratedClass.h"
 #include "Kismet2/KismetEditorUtilities.h"
 #include "Kismet2/BlueprintEditorUtils.h"
 #include "Misc/PackageName.h"
@@ -141,7 +141,7 @@ namespace
 		}
 	}
 
-	FAgentResult List(const FJsonObject& Params, FAgentContext& Context)
+	FAgentResult Cmd_List(const FJsonObject& Params, FAgentContext& Context)
 	{
 		IAssetRegistry& Registry = FAssetRegistryModule::GetRegistry();
 		FARFilter Filter;
@@ -202,7 +202,7 @@ namespace
 		return FAgentResult::Ok(Result);
 	}
 
-	FAgentResult Info(const FJsonObject& Params, FAgentContext& Context)
+	FAgentResult Cmd_Info(const FJsonObject& Params, FAgentContext& Context)
 	{
 		FString Spec;
 		FAgentResult Error;
@@ -282,10 +282,10 @@ namespace
 		return FAgentResult::Ok(Json);
 	}
 
-	FAgentResult Dependencies(const FJsonObject& Params, FAgentContext& Context) { return DependencyQuery(Params, Context, false); }
-	FAgentResult Referencers(const FJsonObject& Params, FAgentContext& Context) { return DependencyQuery(Params, Context, true); }
+	FAgentResult Cmd_Dependencies(const FJsonObject& Params, FAgentContext& Context) { return DependencyQuery(Params, Context, false); }
+	FAgentResult Cmd_Referencers(const FJsonObject& Params, FAgentContext& Context) { return DependencyQuery(Params, Context, true); }
 
-	FAgentResult SourceControl(const FJsonObject& Params, FAgentContext& Context)
+	FAgentResult Cmd_SourceControl(const FJsonObject& Params, FAgentContext& Context)
 	{
 		TArray<FString> Specs = AgentJson::GetStringOrArray(Params, TEXT("assets"));
 		TSharedRef<FJsonObject> Json = AgentJson::Obj();
@@ -321,7 +321,7 @@ namespace
 		return FAgentResult::Ok(Json);
 	}
 
-	FAgentResult CheckOut(const FJsonObject& Params, FAgentContext& Context)
+	FAgentResult Cmd_CheckOut(const FJsonObject& Params, FAgentContext& Context)
 	{
 		TArray<FString> Specs = AgentJson::GetStringOrArray(Params, TEXT("assets"));
 		TArray<FString> Done, Failed;
@@ -344,7 +344,7 @@ namespace
 		return FAgentResult::Ok(Json);
 	}
 
-	FAgentResult OpenInEditor(const FJsonObject& Params, FAgentContext& Context)
+	FAgentResult Cmd_OpenInEditor(const FJsonObject& Params, FAgentContext& Context)
 	{
 		FString Spec;
 		FAgentResult Error;
@@ -362,7 +362,7 @@ namespace
 		return FAgentResult::Ok(AgentCmd::AssetRef(Asset));
 	}
 
-	FAgentResult CreateBlueprint(const FJsonObject& Params, FAgentContext& Context)
+	FAgentResult Cmd_CreateBlueprint(const FJsonObject& Params, FAgentContext& Context)
 	{
 		FString Path, ParentSpec;
 		FAgentResult Error;
@@ -435,12 +435,12 @@ namespace
 
 void RegisterAssetCommands(FAgentCommandRegistry& Registry)
 {
-	Registry.Register(TEXT("assets.list"), TEXT("List assets from the registry (no loading)."), false, &List);
-	Registry.Register(TEXT("assets.info"), TEXT("Asset details + dependencies/referencers."), false, &Info);
-	Registry.Register(TEXT("assets.dependencies"), TEXT("Package dependencies."), false, &Dependencies);
-	Registry.Register(TEXT("assets.referencers"), TEXT("Packages referencing an asset."), false, &Referencers);
-	Registry.Register(TEXT("assets.source_control"), TEXT("Source control status for assets."), false, &SourceControl);
-	Registry.Register(TEXT("assets.checkout"), TEXT("Check out assets in source control."), true, &CheckOut);
-	Registry.Register(TEXT("assets.open"), TEXT("Open an asset in its editor."), false, &OpenInEditor);
-	Registry.Register(TEXT("assets.create_blueprint"), TEXT("Create a new Blueprint or Widget Blueprint."), true, &CreateBlueprint);
+	Registry.Register(TEXT("assets.list"), TEXT("List assets from the registry (no loading)."), false, &Cmd_List);
+	Registry.Register(TEXT("assets.info"), TEXT("Asset details + dependencies/referencers."), false, &Cmd_Info);
+	Registry.Register(TEXT("assets.dependencies"), TEXT("Package dependencies."), false, &Cmd_Dependencies);
+	Registry.Register(TEXT("assets.referencers"), TEXT("Packages referencing an asset."), false, &Cmd_Referencers);
+	Registry.Register(TEXT("assets.source_control"), TEXT("Source control status for assets."), false, &Cmd_SourceControl);
+	Registry.Register(TEXT("assets.checkout"), TEXT("Check out assets in source control."), true, &Cmd_CheckOut);
+	Registry.Register(TEXT("assets.open"), TEXT("Open an asset in its editor."), false, &Cmd_OpenInEditor);
+	Registry.Register(TEXT("assets.create_blueprint"), TEXT("Create a new Blueprint or Widget Blueprint."), true, &Cmd_CreateBlueprint);
 }
