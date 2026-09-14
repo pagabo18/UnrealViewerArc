@@ -53,27 +53,27 @@ def search(ctx, query, kind=None, limit=None, cursor=None, path=None):
 
 
 @tool("who_calls", "Blueprints that call a function (by name, or Class.Function).",
-      schema({"function": P("string", "Function name, e.g. StartCombat or BP_Inventory.AddItem.")}, ["function"]), needs_editor=False)
-def who_calls(ctx, function):
+      schema({"function": P("string", "Function name, e.g. StartCombat or BP_Inventory.AddItem."), "limit": P("integer", "Max rows (default 30).")}, ["function"]), needs_editor=False)
+def who_calls(ctx, function, limit=None):
     _refresh(ctx)
     _ensure_all_deep(ctx)
-    return format_xref("who_calls", function, ctx.index.who_calls(function), ctx, ctx.index.deep_coverage())
+    return format_xref("who_calls", function, ctx.index.who_calls(function), ctx, ctx.index.deep_coverage(), int(limit or 30))
 
 
 @tool("who_reads", "Blueprints that read (Get) a variable.",
-      schema({"variable": P("string", "Variable name, e.g. CurrentHealth.")}, ["variable"]), needs_editor=False)
-def who_reads(ctx, variable):
+      schema({"variable": P("string", "Variable name, e.g. CurrentHealth."), "limit": P("integer", "Max rows (default 30).")}, ["variable"]), needs_editor=False)
+def who_reads(ctx, variable, limit=None):
     _refresh(ctx)
     _ensure_all_deep(ctx)
-    return format_xref("who_reads", variable, ctx.index.who_accesses(variable, "reads"), ctx, ctx.index.deep_coverage())
+    return format_xref("who_reads", variable, ctx.index.who_accesses(variable, "reads"), ctx, ctx.index.deep_coverage(), int(limit or 30))
 
 
 @tool("who_writes", "Blueprints that write (Set) a variable.",
-      schema({"variable": P("string", "Variable name.")}, ["variable"]), needs_editor=False)
-def who_writes(ctx, variable):
+      schema({"variable": P("string", "Variable name."), "limit": P("integer", "Max rows (default 30).")}, ["variable"]), needs_editor=False)
+def who_writes(ctx, variable, limit=None):
     _refresh(ctx)
     _ensure_all_deep(ctx)
-    return format_xref("who_writes", variable, ctx.index.who_accesses(variable, "writes"), ctx, ctx.index.deep_coverage())
+    return format_xref("who_writes", variable, ctx.index.who_accesses(variable, "writes"), ctx, ctx.index.deep_coverage(), int(limit or 30))
 
 
 @tool("find_references", "Assets that reference an asset (Asset Registry referencers + dependencies).",

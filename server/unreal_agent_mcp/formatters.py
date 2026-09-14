@@ -75,14 +75,16 @@ def format_search(query: str, results: List[dict], ctx, coverage: Dict[str, int]
     return "\n".join(lines)
 
 
-def format_xref(kind: str, name: str, hits: List[dict], ctx, coverage: Dict[str, int]) -> str:
+def format_xref(kind: str, name: str, hits: List[dict], ctx, coverage: Dict[str, int], limit: int = 30) -> str:
     if not hits:
         cov = f" ({coverage.get('deep', 0)}/{coverage.get('total', 0)} deep-indexed)"
         return f"{kind} {name}: none found{cov}"
     lines = [f"{kind} {name}: {len(hits)}"]
-    for hit in hits:
+    for hit in hits[:limit]:
         detail = hit.get("call") or hit.get("ref") or hit.get("detail") or ""
         lines.append(f"{ctx.aid(hit['path'])} {hit['name']}  {detail}".rstrip())
+    if len(hits) > limit:
+        lines.append(f"(+{len(hits) - limit} more; pass limit= to see them)")
     return "\n".join(lines)
 
 
