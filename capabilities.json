@@ -1,0 +1,43 @@
+{
+  "version": "0.1.0",
+  "statuses": ["supported", "experimental", "unsupported"],
+  "capabilities": {
+    "Asset.Search": "supported",
+    "Asset.References": "supported",
+    "Asset.SourceControlStatus": "supported",
+    "Asset.CreateBlueprint": "supported",
+    "Blueprint.ReadSummary": "supported",
+    "Blueprint.ReadStructure": "supported",
+    "Blueprint.ReadGraph": "supported",
+    "Blueprint.EditGraph": "supported",
+    "Blueprint.Variables": "supported",
+    "Blueprint.Functions": "supported",
+    "Blueprint.Interfaces": "supported",
+    "Blueprint.Components": "supported",
+    "Blueprint.Compile": "supported",
+    "Blueprint.Save": "supported",
+    "Blueprint.Validate": "supported",
+    "Blueprint.Undo": "supported",
+    "Blueprint.Timelines": "unsupported",
+    "Blueprint.MacroEditing": "experimental",
+    "UMG.ReadTree": "supported",
+    "UMG.ReadWidget": "supported",
+    "UMG.StyleFingerprint": "supported",
+    "UMG.CloneWidget": "supported",
+    "UMG.AddWidget": "supported",
+    "UMG.EditWidget": "supported",
+    "UMG.MoveWidget": "supported",
+    "UMG.BindEvent": "supported",
+    "UMG.ReadAnimations": "supported",
+    "UMG.EditAnimation": "unsupported",
+    "UMG.Preview": "supported",
+    "UMG.PreviewDiff": "supported",
+    "Editor.ViewportScreenshot": "experimental",
+    "Editor.Batch": "supported"
+  },
+  "missing": {
+    "CAP-BP-001": "Timeline node creation/editing",
+    "CAP-UMG-017": "Widget animation keyframe editing",
+    "CAP-ED-003": "Level/actor instance editing (out of scope: Blueprint assets only)"
+  }
+}

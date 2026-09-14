@@ -1,0 +1,18 @@
+{
+  "responseMode": "compact",
+  "maxResults": 20,
+  "cache": true,
+  "autoCompile": true,
+  "autoSave": false,
+  "visualValidation": true,
+  "autoDeepIndex": true,
+  "maxAutoDeepIndex": 1000,
+  "indexRefreshSeconds": 15,
+  "contentRoots": ["/Game"],
+  "plugin": {
+    "port": 8766,
+    "timeoutSeconds": 180,
+    "allowRemote": false,
+    "autoStart": true
+  }
+}
