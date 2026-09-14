@@ -1,0 +1,28 @@
+{
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "0.1.0",
+	"FriendlyName": "Claude Blueprint Agent",
+	"Description": "Editor-only bridge that lets Claude (via the unreal-blueprint-agent MCP server) inspect and edit Blueprints, Blueprint graphs and Widget Blueprints through a local HTTP API. Token-efficient by design: filtered, paginated, compact responses.",
+	"Category": "Editor",
+	"CreatedBy": "claude-unreal-blueprint-agent",
+	"CreatedByURL": "https://github.com/pagabo18/UnrealViewerArc",
+	"DocsURL": "https://github.com/pagabo18/UnrealViewerArc",
+	"CanContainContent": false,
+	"IsBetaVersion": true,
+	"IsExperimentalVersion": false,
+	"Installed": false,
+	"EngineVersion": "5.5.0",
+	"Modules": [
+		{
+			"Name": "ClaudeBlueprintAgent",
+			"Type": "Editor",
+			"LoadingPhase": "PostEngineInit",
+			"PlatformAllowList": [ "Win64", "Mac", "Linux" ]
+		}
+	],
+	"Plugins": [
+		{ "Name": "DataValidation", "Enabled": true },
+		{ "Name": "EditorScriptingUtilities", "Enabled": true }
+	]
+}
