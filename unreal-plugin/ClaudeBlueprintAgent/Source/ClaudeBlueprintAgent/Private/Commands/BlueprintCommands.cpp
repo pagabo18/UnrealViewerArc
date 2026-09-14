@@ -1245,7 +1245,6 @@ namespace
 		if (!Blueprint) { return Error; }
 		UPackage* Package = Blueprint->GetOutermost();
 		TArray<UPackage*> Packages = { Package };
-		FText ErrorText;
 		const bool bOk = UPackageTools::ReloadPackages(Packages);
 		TSharedRef<FJsonObject> Json = AgentJson::Obj();
 		Json->SetStringField(TEXT("asset"), Package->GetName());

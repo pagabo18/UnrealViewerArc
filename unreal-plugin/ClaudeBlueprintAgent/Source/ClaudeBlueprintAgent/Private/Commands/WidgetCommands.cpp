@@ -1112,7 +1112,8 @@ namespace
 		{
 			return FAgentResult::Error(AgentErrors::Internal, TEXT("No editor world."));
 		}
-		UUserWidget* Instance = CreateWidget<UUserWidget>(World, TSubclassOf<UUserWidget>(WidgetBlueprint->GeneratedClass));
+		UClass* WidgetClass = WidgetBlueprint->GeneratedClass.Get();
+		UUserWidget* Instance = CreateWidget<UUserWidget>(World, WidgetClass);
 		if (!Instance)
 		{
 			return FAgentResult::Error(AgentErrors::Internal, TEXT("CreateWidget failed."));

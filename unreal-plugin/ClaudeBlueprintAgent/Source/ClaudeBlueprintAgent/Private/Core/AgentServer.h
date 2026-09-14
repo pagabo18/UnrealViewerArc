@@ -2,12 +2,12 @@
 
 #include "CoreMinimal.h"
 #include "HttpRouteHandle.h"
+#include "HttpResultCallback.h"
 
 class FClaudeBlueprintAgentModule;
 class IHttpRouter;
 struct FHttpServerRequest;
 struct FHttpServerResponse;
-using FHttpResultCallback = TFunction<void(TUniquePtr<FHttpServerResponse>&& Response)>;
 
 /**
  * Localhost HTTP endpoint: POST /rpc {"cmd": "...", "params": {...}}.

@@ -258,7 +258,7 @@ namespace
 				{
 					Node->VariableReference.SetExternalMember(FName(*VarName), OwnerClass);
 				}
-				else if (Property && Property->GetOwnerClass() && !Blueprint->GeneratedClass->IsChildOf(Property->GetOwnerClass()) )
+				else if (Property && Property->GetOwnerClass() && Blueprint->GeneratedClass && !Blueprint->GeneratedClass->IsChildOf(Property->GetOwnerClass()))
 				{
 					Node->VariableReference.SetExternalMember(FName(*VarName), Property->GetOwnerClass());
 				}

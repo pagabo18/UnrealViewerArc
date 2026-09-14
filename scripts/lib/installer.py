@@ -580,6 +580,9 @@ def cmd_uninstall(args):
         if os.path.isdir(record.get("plugin_dir", "")):
             shutil.rmtree(record["plugin_dir"])
             Log.ok(f"removed {record['plugin_dir']}")
+            parent = os.path.dirname(record["plugin_dir"])
+            if os.path.basename(parent) == "Plugins" and os.path.isdir(parent) and not os.listdir(parent):
+                os.rmdir(parent)
         if os.path.isfile(uproject):
             enable_plugin_in_uproject(uproject, False)
             remove_mcp(uproject, record.get("mcp_scope", "project"))
