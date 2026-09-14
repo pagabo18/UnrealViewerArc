@@ -354,7 +354,7 @@ namespace
 			const int32 Outputs = AgentJson::GetInt(Spec, TEXT("outputs"), 2);
 			for (int32 Index = 2; Index < Outputs; ++Index)
 			{
-				Cast<UK2Node_ExecutionSequence>(OutNode)->AddPinToExecutionNode();
+				Cast<UK2Node_ExecutionSequence>(OutNode)->AddInputPin();
 			}
 			return FAgentResult::Ok();
 		}

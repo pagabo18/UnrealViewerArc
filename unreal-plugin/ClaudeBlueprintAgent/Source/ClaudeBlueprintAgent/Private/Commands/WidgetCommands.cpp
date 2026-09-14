@@ -1043,14 +1043,15 @@ namespace
 			if (!Filter.IsEmpty() && !AnimName.Equals(Filter, ESearchCase::IgnoreCase) && !Animation->GetName().Equals(Filter, ESearchCase::IgnoreCase)) { continue; }
 			TSharedRef<FJsonObject> Item = AgentJson::Obj();
 			Item->SetStringField(TEXT("name"), AnimName);
-			const UMovieScene* Scene = Animation->GetMovieScene();
+			UMovieScene* Scene = Animation->GetMovieScene();
+			const UMovieScene* ConstScene = Scene;
 			if (Scene)
 			{
 				const TRange<FFrameNumber> Range = Scene->GetPlaybackRange();
 				const FFrameNumber Frames = Range.GetUpperBoundValue() - Range.GetLowerBoundValue();
 				Item->SetNumberField(TEXT("seconds"), Scene->GetTickResolution().AsSeconds(FFrameTime(Frames)));
 				TArray<TSharedPtr<FJsonValue>> Bindings;
-				for (const FMovieSceneBinding& Binding : Scene->GetBindings())
+				for (const FMovieSceneBinding& Binding : ConstScene->GetBindings())
 				{
 					TSharedRef<FJsonObject> B = AgentJson::Obj();
 					FString WidgetName;
